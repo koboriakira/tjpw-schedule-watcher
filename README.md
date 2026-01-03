@@ -1,6 +1,265 @@
-# Python Project 2026
+# TJPW Schedule Watcher
 
-2026年の最新Python開発テンプレート - uv、ruff、pytestを使った現代的な開発環境
+東京女子プロレス（TJPW）のスケジュール自動取得・カレンダー登録サービス
+
+## 🚀 概要
+
+東京女子プロレスの公式サイトから試合スケジュール情報を自動取得し、Google Calendar / Notion等の外部カレンダーサービスに自動登録することで、ファンが観戦予定を立てやすくするためのツールです。
+
+### 主な機能
+
+- ✅ **自動スケジュール取得**: TJPWの公式サイトから試合スケジュールを自動的に取得
+- ✅ **外部API連携**: Google Calendar、Notion APIへの自動登録
+- ✅ **柔軟な期間指定**: デフォルト90日間、開発モード7日間の取得期間
+- ✅ **クリーンアーキテクチャ**: ドメイン駆動設計に基づいた保守性の高い実装
+
+## 📋 必要要件
+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (推奨)
+- Selenium (Docker コンテナまたはローカル実行)
+
+## セットアップ
+
+### 1. プロジェクトのセットアップ
+
+```bash
+# uvのインストール（まだの場合）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# プロジェクトのセットアップ
+uv sync
+```
+
+### 2. Seleniumの起動
+
+#### Docker で起動する場合（推奨）
+
+```bash
+docker run -d --name chrome-for-tjpw \
+  -p 4444:4444 \
+  --shm-size="2g" \
+  -e TZ=Asia/Tokyo \
+  seleniarm/standalone-chromium:114.0
+```
+
+#### Docker Compose で起動する場合
+
+```yaml
+services:
+  chrome:
+    image: seleniarm/standalone-chromium:114.0
+    ports:
+      - 4444:4444
+      - 7900:7900  # ブラウザ画面確認用（VNC）
+    environment:
+      - TZ=Asia/Tokyo
+    shm_size: 2gb
+```
+
+```bash
+docker compose up -d
+```
+
+### 3. 環境変数の設定
+
+**重要:** `.env`ファイルを使用することを推奨します（サンプルは`.env.example`を参照）。
+
+```bash
+# Selenium接続先（必須）
+export SELENIUM_DOMAIN=http://localhost:4444
+
+# Google Calendar API（Lambda経由）※オプション
+# 実際のURLは開発チーム内で共有されているものを使用してください
+export LAMBDA_GOOGLE_CALENDAR_API_DOMAIN=https://your-lambda-url.lambda-url.ap-northeast-1.on.aws/
+
+# Notion API ※オプション
+# 実際のURLとシークレットは開発チーム内で共有されているものを使用してください
+export LAMBDA_NOTION_API_DOMAIN=https://your-lambda-url.lambda-url.ap-northeast-1.on.aws/
+export NOTION_SECRET=your_notion_secret_token
+```
+
+または、`.env`ファイルを作成：
+
+```bash
+# .envファイルを作成（.env.exampleをコピー）
+cp .env.example .env
+# .envファイルを編集して実際の値を設定
+```
+
+## 使い方
+
+### 基本的な使用方法
+
+```bash
+# dry-runモードでテスト実行（外部APIに保存しない）
+uv run tjpw-schedule-watcher update --dry-run
+
+# 開発モードで実行（7日間のスケジュールのみ取得）
+uv run tjpw-schedule-watcher update --dev --dry-run
+
+# 本番実行（90日間のスケジュールを取得し、外部APIに保存）
+# ※外部API（Google Calendar/Notion）の環境変数が設定されている必要があります
+uv run tjpw-schedule-watcher update
+```
+
+### コマンドオプション
+
+```bash
+# ヘルプの表示
+uv run tjpw-schedule-watcher --help
+uv run tjpw-schedule-watcher update --help
+
+# オプション:
+#   --dev      開発モード（7日間のみ取得）
+#   --dry-run  外部APIに保存しない（テスト用）
+```
+
+## プロジェクト構造
+
+```
+tjpw-schedule-watcher/
+├── src/
+│   └── tjpw_schedule_watcher/
+│       ├── domain/              # ドメイン層（ビジネスロジック）
+│       │   ├── models.py        # ドメインモデル
+│       │   ├── value_objects.py # 値オブジェクト
+│       │   └── interfaces.py    # インターフェース定義
+│       ├── usecase/             # ユースケース層
+│       │   └── scrape_tjpw.py   # スケジュール取得ユースケース
+│       ├── infrastructure/      # インフラ層（技術的実装）
+│       │   ├── scrapers.py      # Seleniumスクレイピング実装
+│       │   ├── selenium_factory.py # Selenium接続管理
+│       │   ├── external_apis.py # 外部API連携実装
+│       │   └── constants.py     # 定数定義
+│       ├── main.py              # CLIエントリーポイント
+│       └── api.py               # FastAPI（将来の拡張用）
+├── tests/                       # テストコード
+├── SPEC.md                      # 要求定義書
+└── pyproject.toml               # プロジェクト設定
+```
+
+## アーキテクチャ
+
+クリーンアーキテクチャに基づいた3層構造：
+
+```
+CLI層 (main.py)
+    ↓
+UseCase層 (ScrapeTjpw)
+    ↓
+Domain層 (TournamentSchedule, Scraper, ScheduleExternalApi)
+    ↓
+Infrastructure層 (SeleniumScraper, ScheduleGoogleCalendarApi, ScheduleNotionApi)
+```
+
+## 開発コマンド
+
+```bash
+# テスト実行
+uv run pytest
+
+# テスト（詳細モード）
+uv run pytest -v
+
+# コードフォーマット
+uv run ruff format .
+
+# リンティング
+uv run ruff check .
+
+# 型チェック
+uv run mypy
+```
+
+## 取得データ
+
+### スクレイピング対象
+
+- **対象サイト**: https://www.tjpw.jp/schedules
+- **取得項目**:
+  - 大会名
+  - 開催日時（開場時刻/開始時刻）
+  - 会場名
+  - 座席種別
+  - 備考
+  - 詳細ページURL
+
+### 外部API連携
+
+#### Google Calendar API
+
+```json
+{
+  "category": "東京女子",
+  "title": "大会名",
+  "start": "2026-01-15T13:00:00+09:00",
+  "end": "2026-01-15T17:00:00+09:00",
+  "detail": "URL\n\n会場\n\n座席種別\n\n備考"
+}
+```
+
+#### Notion API
+
+```json
+{
+  "url": "詳細ページURL",
+  "title": "大会名",
+  "date": "2026-01-15",
+  "promotion": "東京女子プロレス",
+  "tags": []
+}
+```
+
+## 注意事項
+
+- スクレイピングの間隔は3秒に設定されています（サーバー負荷を考慮）
+- デフォルトでは90日間のスケジュールを取得します
+- 外部APIへの登録には各サービスの認証情報が必要です
+- Seleniumコンテナが起動していない場合はエラーになります
+
+## トラブルシューティング
+
+### Seleniumが起動しない
+
+```bash
+# Dockerコンテナの状態確認
+docker ps
+
+# コンテナが起動していない場合
+docker start chrome-for-tjpw
+
+# または再起動
+docker rm chrome-for-tjpw
+docker run -d --name chrome-for-tjpw \
+  -p 4444:4444 \
+  --shm-size="2g" \
+  -e TZ=Asia/Tokyo \
+  seleniarm/standalone-chromium:114.0
+```
+
+### 環境変数が設定されていない
+
+```bash
+# 現在の環境変数を確認
+env | grep -E 'SELENIUM|LAMBDA|NOTION'
+
+# 必要に応じて設定
+export SELENIUM_DOMAIN=http://localhost:4444
+```
+
+## 今後の改善予定
+
+- [ ] ユニットテストの拡充（カバレッジ向上）
+- [ ] 選手誕生日の自動登録機能
+- [ ] Playwright等の代替スクレイピング技術の検討
+- [ ] エラーリトライ処理の実装
+- [ ] 定期実行の自動化（cron、GitHub Actions等）
+- [ ] 重複登録の防止機構
+
+## ライセンス
+
+MIT License
 
 ## 🚀 クイックスタート
 
