@@ -4,12 +4,12 @@
 
 ## 🚀 概要
 
-東京女子プロレスの公式サイトから試合スケジュール情報を自動取得し、Google Calendar / Notion等の外部カレンダーサービスに自動登録することで、ファンが観戦予定を立てやすくするためのツールです。
+東京女子プロレスの公式サイトから試合スケジュール情報を自動取得し、Google Calendarに自動登録することで、ファンが観戦予定を立てやすくするためのツールです。
 
 ### 主な機能
 
 - ✅ **自動スケジュール取得**: TJPWの公式サイトから試合スケジュールを自動的に取得
-- ✅ **外部API連携**: Google Calendar、Notion APIへの自動登録
+- ✅ **外部API連携**: Google Calendarへの自動登録
 - ✅ **柔軟な期間指定**: デフォルト90日間、開発モード7日間の取得期間
 - ✅ **クリーンアーキテクチャ**: ドメイン駆動設計に基づいた保守性の高い実装
 
@@ -72,11 +72,6 @@ export SELENIUM_DOMAIN=http://localhost:4444
 # Google Calendar API（Lambda経由）※オプション
 # 実際のURLは開発チーム内で共有されているものを使用してください
 export LAMBDA_GOOGLE_CALENDAR_API_DOMAIN=https://your-lambda-url.lambda-url.ap-northeast-1.on.aws/
-
-# Notion API ※オプション
-# 実際のURLとシークレットは開発チーム内で共有されているものを使用してください
-export LAMBDA_NOTION_API_DOMAIN=https://your-lambda-url.lambda-url.ap-northeast-1.on.aws/
-export NOTION_SECRET=your_notion_secret_token
 ```
 
 または、`.env`ファイルを作成：
@@ -99,7 +94,7 @@ uv run tjpw-schedule-watcher update --dry-run
 uv run tjpw-schedule-watcher update --dev --dry-run
 
 # 本番実行（90日間のスケジュールを取得し、外部APIに保存）
-# ※外部API（Google Calendar/Notion）の環境変数が設定されている必要があります
+# ※外部API（Google Calendar）の環境変数が設定されている必要があります
 uv run tjpw-schedule-watcher update
 ```
 
@@ -150,7 +145,7 @@ UseCase層 (ScrapeTjpw)
     ↓
 Domain層 (TournamentSchedule, Scraper, ScheduleExternalApi)
     ↓
-Infrastructure層 (SeleniumScraper, ScheduleGoogleCalendarApi, ScheduleNotionApi)
+Infrastructure層 (SeleniumScraper, ScheduleGoogleCalendarApi)
 ```
 
 ## 開発コマンド
@@ -199,18 +194,6 @@ uv run mypy
 }
 ```
 
-#### Notion API
-
-```json
-{
-  "url": "詳細ページURL",
-  "title": "大会名",
-  "date": "2026-01-15",
-  "promotion": "東京女子プロレス",
-  "tags": []
-}
-```
-
 ## 注意事項
 
 - スクレイピングの間隔は3秒に設定されています（サーバー負荷を考慮）
@@ -242,7 +225,7 @@ docker run -d --name chrome-for-tjpw \
 
 ```bash
 # 現在の環境変数を確認
-env | grep -E 'SELENIUM|LAMBDA|NOTION'
+env | grep -E 'SELENIUM|LAMBDA'
 
 # 必要に応じて設定
 export SELENIUM_DOMAIN=http://localhost:4444

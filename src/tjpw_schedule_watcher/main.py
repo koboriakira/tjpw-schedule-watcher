@@ -13,7 +13,6 @@ from .domain.value_objects import ScrapeRange
 from .infrastructure.external_apis import (
     NullScheduleExternalApi,
     ScheduleGoogleCalendarApi,
-    ScheduleNotionApi,
 )
 from .infrastructure.scrapers import SeleniumScraper
 from .infrastructure.selenium_factory import (
@@ -41,7 +40,7 @@ def update(
 ) -> None:
     """TJPWスケジュールを更新します。
 
-    TJPWの公式サイトからスケジュールを取得し、外部API（Google Calendar、Notion）に保存します。
+    TJPWの公式サイトからスケジュールを取得し、外部API（Google Calendar）に保存します。
     """
     console.print("🚀 [bold]TJPW Schedule Watcher を起動しています...[/bold]")
 
@@ -70,16 +69,6 @@ def update(
                 console.print("✅ [green]Google Calendar API が設定されています[/green]")
             except ValueError as e:
                 console.print(f"⚠️  [yellow]Google Calendar API が設定されていません: {e}[/yellow]")
-
-        # Try to create Notion API
-        if os.environ.get("LAMBDA_NOTION_API_DOMAIN") and os.environ.get(
-            "NOTION_SECRET"
-        ):
-            try:
-                external_apis.append(ScheduleNotionApi())
-                console.print("✅ [green]Notion API が設定されています[/green]")
-            except ValueError as e:
-                console.print(f"⚠️  [yellow]Notion API が設定されていません: {e}[/yellow]")
 
         if not external_apis:
             console.print("⚠️  [yellow]外部APIが設定されていません。dry-runモードで実行します。[/yellow]")

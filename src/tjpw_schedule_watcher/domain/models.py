@@ -36,16 +36,3 @@ class TournamentSchedule:
             "detail": f"{self.url}\n\n{self.venue.value}\n\n{self.seat_type.value}\n\n{self.note.value}",
         }
 
-    def to_notion_dict(self) -> dict[str, str | list[str]]:
-        """Convert to Notion API format.
-
-        Returns:
-            Dictionary for Notion API
-        """
-        return {
-            "url": self.url,
-            "title": self.tournament_name.value,
-            "date": self.date.date_value.isoformat(),
-            "promotion": "東京女子プロレス",
-            "tags": [],
-        }

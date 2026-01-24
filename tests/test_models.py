@@ -36,23 +36,3 @@ class TestTournamentSchedule:
         assert "Test Venue" in result["detail"]
         assert "全席指定" in result["detail"]
         assert "Test Note" in result["detail"]
-
-    def test_to_notion_dict(self) -> None:
-        """Test converting to Notion format."""
-        date_str = "2023年10月9日(月)　開場13:00　開始14:00"
-        schedule = TournamentSchedule(
-            url="https://www.tjpw.jp/schedules/123",
-            tournament_name=TournamentName(value="Test Tournament"),
-            date=Date.from_string(date_str),
-            venue=Venue(value="Test Venue"),
-            seat_type=SeatType(value="全席指定"),
-            note=Note(value="Test Note"),
-        )
-
-        result = schedule.to_notion_dict()
-
-        assert result["url"] == "https://www.tjpw.jp/schedules/123"
-        assert result["title"] == "Test Tournament"
-        assert result["date"] == "2023-10-09"
-        assert result["promotion"] == "東京女子プロレス"
-        assert result["tags"] == []
