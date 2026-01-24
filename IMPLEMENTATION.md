@@ -23,7 +23,6 @@ SPEC.mdに基づいて、東京女子プロレスのスケジュール自動取�
 #### Domain Models ([models.py](src/tjpw_schedule_watcher/domain/models.py))
 - ✅ `TournamentSchedule`: 試合スケジュール
   - Google Calendar API形式への変換メソッド
-  - Notion API形式への変換メソッド
 
 #### Interfaces ([interfaces.py](src/tjpw_schedule_watcher/domain/interfaces.py))
 - ✅ `Scraper`: スクレイピングの抽象インターフェース
@@ -48,7 +47,6 @@ SPEC.mdに基づいて、東京女子プロレスのスケジュール自動取�
 
 #### 外部API実装 ([external_apis.py](src/tjpw_schedule_watcher/infrastructure/external_apis.py))
 - ✅ `ScheduleGoogleCalendarApi`: Google Calendar API（Lambda経由）
-- ✅ `ScheduleNotionApi`: Notion API
 - ✅ `NullScheduleExternalApi`: テスト用（何もしない実装）
 
 #### 定数 ([constants.py](src/tjpw_schedule_watcher/infrastructure/constants.py))
@@ -83,7 +81,6 @@ SPEC.mdに基づいて、東京女子プロレスのスケジュール自動取�
 #### [test_models.py](tests/test_models.py)
 - ✅ TournamentScheduleのテスト
   - Google Calendar形式への変換
-  - Notion形式への変換
 
 ## 📊 技術仕様
 
@@ -111,8 +108,6 @@ Infrastructure層 (SeleniumScraper, External APIs)
 |--------|------|------|
 | `SELENIUM_DOMAIN` | ✅ | Selenium接続先（例: http://localhost:4444） |
 | `LAMBDA_GOOGLE_CALENDAR_API_DOMAIN` | ❌ | Google Calendar API（Lambda経由） |
-| `LAMBDA_NOTION_API_DOMAIN` | ❌ | Notion APIドメイン |
-| `NOTION_SECRET` | ❌ | Notion認証トークン |
 
 ## 🚀 使用方法
 
@@ -144,7 +139,6 @@ uv run tjpw-schedule-watcher update --dev --dry-run
 ```bash
 # 環境変数を設定後
 export LAMBDA_GOOGLE_CALENDAR_API_DOMAIN=https://your-api.com/
-export NOTION_SECRET=your_secret
 
 uv run tjpw-schedule-watcher update
 ```
@@ -169,7 +163,6 @@ tests/test_value_objects.py::TestScrapeRange::test_invalid_range PASSED
 tests/test_value_objects.py::TestScrapeRange::test_default_range PASSED
 tests/test_value_objects.py::TestScrapeRange::test_default_development_range PASSED
 tests/test_models.py::TestTournamentSchedule::test_to_google_calendar_dict PASSED
-tests/test_models.py::TestTournamentSchedule::test_to_notion_dict PASSED
 
 # 型チェック: 成功
 $ uv run mypy
@@ -217,7 +210,6 @@ pyproject.toml              # 更新（依存関係追加、カバレッジ設�
 | ScrapeTjpw UseCase | ✅ | 月単位処理、3秒間隔 |
 | CLIインターフェース | ✅ | typer使用、--dev、--dry-run |
 | Google Calendar API連携 | ✅ | Lambda経由の実装 |
-| Notion API連携 | ✅ | 実装済み |
 | 除外URL機能 | ✅ | IGNORE_URLS定数 |
 | エラーハンドリング | ✅ | NotReadyError等 |
 | 3秒間隔のスクレイピング | ✅ | time.sleep(3)実装 |
