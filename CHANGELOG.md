@@ -5,6 +5,14 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## 0.1.0 (2026-04-28)
+
+
+### Bug Fixes
+
+* include today in scrape range by starting at midnight ([0f38ad6](https://github.com/koboriakira/tjpw-schedule-watcher/commit/0f38ad6fc6c6d0ab79faace6f028e2d125de4921))
+* remove Notion API integration ([3375062](https://github.com/koboriakira/tjpw-schedule-watcher/commit/3375062eb1fe34e87acd0976672ce03c28a9de89))
+
 ## [0.3.0](https://github.com/koboriakira/tjpw-schedule-watcher/compare/v0.2.0...v0.3.0) (2026-01-02)
 
 
