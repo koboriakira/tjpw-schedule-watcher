@@ -139,7 +139,7 @@ class ScrapeRange:
         Returns:
             ScrapeRange with default values
         """
-        start_date = datetime.now()
+        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         days = 7 if development else 90
         end_date = start_date + timedelta(days=days)
         return cls(start_date=start_date, end_date=end_date)

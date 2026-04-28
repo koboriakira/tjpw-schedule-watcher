@@ -106,15 +106,25 @@ class TestScrapeRange:
         range_obj = ScrapeRange.default(development=False)
 
         assert range_obj.start_date <= range_obj.end_date
-        # Should be approximately 90 days
+        # start_date must be at the beginning of today (midnight)
+        assert range_obj.start_date.hour == 0
+        assert range_obj.start_date.minute == 0
+        assert range_obj.start_date.second == 0
+        assert range_obj.start_date.microsecond == 0
+        # Should be exactly 90 days
         delta = (range_obj.end_date - range_obj.start_date).days
-        assert 89 <= delta <= 91
+        assert delta == 90
 
     def test_default_development_range(self) -> None:
         """Test default development scrape range."""
         range_obj = ScrapeRange.default(development=True)
 
         assert range_obj.start_date <= range_obj.end_date
-        # Should be approximately 7 days
+        # start_date must be at the beginning of today (midnight)
+        assert range_obj.start_date.hour == 0
+        assert range_obj.start_date.minute == 0
+        assert range_obj.start_date.second == 0
+        assert range_obj.start_date.microsecond == 0
+        # Should be exactly 7 days
         delta = (range_obj.end_date - range_obj.start_date).days
-        assert 6 <= delta <= 8
+        assert delta == 7
